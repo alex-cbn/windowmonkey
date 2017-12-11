@@ -1,5 +1,7 @@
 import wx
 
+APP_EXIT = 1
+
 
 class CenteredFrame(wx.Frame):
     def __init__(self, parent, title):
@@ -16,7 +18,7 @@ class MenuFrame(wx.Frame):
     def InitUi(self):
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
-        file_menu_exit = file_menu.Append(wx.ID_EXIT, 'Eject', 'Ankide acola')
+        file_menu_exit = wx.MenuItem(wx.ID_EXIT, 'Eject', 'Ankide acola')
         menu_bar.Append(file_menu, '&File')
         self.SetMenuBar(menu_bar)
         self.Bind(wx.EVT_MENU, self.OnQuit, file_menu_exit)
@@ -29,8 +31,31 @@ class MenuFrame(wx.Frame):
         self.Close()
 
 
+class MenuFrameIcons(MenuFrame):
+    def __init__(self, *args, **kwargs):
+        super(MenuFrameIcons, self).__init__(*args, **kwargs)
+        self.InitUi()
+
+    def InitUi(self):
+        menu_bar = wx.MenuBar()
+        file_menu = wx.Menu()
+        file_menu_exit = wx.MenuItem(file_menu, APP_EXIT, '&Eject\tCtrl+C')
+        file_menu_exit.SetBitmap(wx.Bitmap('exit.bmp'))
+        file_menu.Append(file_menu_exit)
+        self.Bind(wx.EVT_MENU, self.OnQuit, id=APP_EXIT)
+        menu_bar.Append(file_menu, '&File')
+        self.SetMenuBar(menu_bar)
+        self.SetSize((350, 300))
+        self.SetTitle('Icons and shortcuts')
+        self.Center()
+        self.Show(True)
+
+    def OnQuit(self, e):
+        self.Close()
+
+
 if __name__ == '__main__':
     print("Here it goes")
     app = wx.App()
-    MenuFrame(None)
+    MenuFrameIcons(None)
     app.MainLoop()
