@@ -89,8 +89,57 @@ class SubMenuFrame(wx.Frame):
         self.Close()
 
 
+class MenuItemTypes(wx.Frame):
+    def __init__(self, *args, **kwargs):
+        super(MenuItemTypes, self).__init__(*args, **kwargs)
+        self.OnInit()
+
+    def OnInit(self):
+        menu_bar = wx.MenuBar()
+        file_menu = wx.Menu()
+        view_menu = wx.Menu()
+        self.view_menu_show_toolbar = wx.MenuItem(view_menu, wx.ID_ANY, 'Show toolbar', 'Show Toolbar',
+                                                  kind=wx.ITEM_CHECK)
+        self.view_menu_show_statubar = wx.MenuItem(view_menu, wx.ID_ANY, 'Show statusbar', 'Show Statusbar',
+                                                   kind=wx.ITEM_CHECK)
+        view_menu.Append(self.view_menu_show_toolbar)
+        view_menu.Append(self.view_menu_show_statubar)
+        self.view_menu_show_statubar.Check(True)
+        self.view_menu_show_toolbar.Check(True)
+
+        self.Bind(wx.EVT_MENU, self.ToggleToolBar, self.view_menu_show_toolbar)
+        self.Bind(wx.EVT_MENU, self.ToggleStatusBar, self.view_menu_show_statubar)
+        menu_bar.Append(file_menu, '&File')
+        menu_bar.Append(view_menu, '&View')
+        self.SetMenuBar(menu_bar)
+
+        self.toolbar = self.CreateToolBar()
+        self.toolbar.AddTool(1, '', wx.Bitmap('exit.bmp'))
+        self.toolbar.Realize()
+
+        self.statusbar = self.CreateStatusBar()
+        self.statusbar.SetStatusText('Ready')
+
+        self.SetSize((350, 250))
+        self.SetTitle('Check Menu Item')
+        self.Center()
+        self.Show(True)
+
+    def ToggleStatusBar(self, e):
+        if self.view_menu_show_statubar.IsChecked():
+            self.statusbar.Show()
+        else:
+            self.statusbar.Hide()
+
+    def ToggleToolBar(self, e):
+        if self.view_menu_show_toolbar.IsChecked():
+            self.toolbar.Show()
+        else:
+            self.toolbar.Hide()
+
+
 if __name__ == '__main__':
     print("Here it goes")
     app = wx.App()
-    SubMenuFrame(None)
+    MenuItemTypes(None)
     app.MainLoop()
