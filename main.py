@@ -125,6 +125,8 @@ class MenuItemTypes(wx.Frame):
         self.Center()
         self.Show(True)
 
+        self.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
+
     def ToggleStatusBar(self, e):
         if self.view_menu_show_statubar.IsChecked():
             self.statusbar.Show()
@@ -137,9 +139,49 @@ class MenuItemTypes(wx.Frame):
         else:
             self.toolbar.Hide()
 
+    def OnRightDown(self, e):
+        self.PopupMenu(PopUpMenu(self), e.GetPosition())
+
+
+class PopUpMenu(wx.Menu):
+
+    def __init__(self, parent):
+        super(PopUpMenu, self).__init__()
+        self.parent = parent
+
+        menu_minimize = wx.MenuItem(self, wx.NewId(), 'Minimize')
+        self.Append(menu_minimize)
+        self.Bind(wx.EVT_MENU, self.OnMinimize, menu_minimize)
+
+        menu_close = wx.MenuItem(self, wx.NewId(), 'Close')
+        self.Append(menu_close)
+        self.Bind(wx.EVT_MENU, self.OnClose, menu_close)
+
+    def OnMinimize(self, e):
+        self.parent.Iconize()
+
+    def OnClose(self, e):
+        self.parent.Close()
+
+
+class PanelTextFrame(wx.Frame):
+
+    def __init__(self, parent, title):
+        super(PanelTextFrame, self).__init__(parent, title=title, size=(260, 180))
+        panel = wx.Panel(self, wx.ID_ANY)
+        menu_bar = wx.MenuBar()
+        menu_cyka = wx.Menu()
+        menu_blyat = wx.Menu()
+        menu_bar.Append(menu_cyka, '&Cyka')
+        menu_bar.Append(menu_blyat, '&Blyat')
+        self.SetMenuBar(menu_bar)
+        wx.TextCtrl(panel, pos=(3, 3), size=(50, 50))
+        self.Center()
+        self.Show()
+
 
 if __name__ == '__main__':
     print("Here it goes")
     app = wx.App()
-    MenuItemTypes(None)
+    PanelTextFrame(None, "Cyka Blyat")
     app.MainLoop()
