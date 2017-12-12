@@ -180,8 +180,25 @@ class PanelTextFrame(wx.Frame):
         self.Show()
 
 
+class BoxSizerFrame(wx.Frame):
+
+    def __init__(self, parent, title):
+        super(BoxSizerFrame, self).__init__(parent, title=title, size=(260, 160))
+        menu_bar = wx.MenuBar()
+        file_menu = wx.Menu()
+        edit_menu = wx.Menu()
+        help_menu = wx.Menu()
+        menu_bar.Append(file_menu, '&File')
+        menu_bar.Append(edit_menu, '&Edit')
+        menu_bar.Append(help_menu, '&Help')
+        self.SetMenuBar(menu_bar)
+        wx.TextCtrl(self)
+        self.Center()
+        self.Show()
+
+
 if __name__ == '__main__':
     print("Here it goes")
     app = wx.App()
-    PanelTextFrame(None, "Cyka Blyat")
+    BoxSizerFrame(None, "Cyka Blyat")
     app.MainLoop()
