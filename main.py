@@ -197,8 +197,23 @@ class BoxSizerFrame(wx.Frame):
         self.Show()
 
 
+class BoxFrame(wx.Frame):
+
+    def __init__(self, parent, title):
+        super(BoxFrame, self).__init__(parent, title=title, size=(350, 250))
+        panel = wx.Panel(self)
+        panel.SetBackgroundColour('#ff0000')
+        vertical_box = wx.BoxSizer(wx.VERTICAL)
+        median_panel = wx.Panel(panel)
+        median_panel.SetBackgroundColour('#00ff00')
+        vertical_box.Add(median_panel, 1, wx.EXPAND | wx.ALL, 20)
+        panel.SetSizer(vertical_box)
+        self.Center()
+        self.Show()
+
+
 if __name__ == '__main__':
     print("Here it goes")
     app = wx.App()
-    BoxSizerFrame(None, "Cyka Blyat")
+    BoxFrame(None, "Cyka Blyat")
     app.MainLoop()
