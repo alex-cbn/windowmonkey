@@ -215,7 +215,7 @@ class BoxFrame(wx.Frame):
 class GoToClass(wx.Frame):
 
     def __init__(self, parent, title):
-        super(GoToClass, self).__init__(parent, title=title, size=(390, 350))
+        super(GoToClass, self).__init__(parent, title=title, size=(540, 420))
         panel = wx.Panel(self)
 
         font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
@@ -252,7 +252,7 @@ class GoToClass(wx.Frame):
         horizontal_box_4 = wx.BoxSizer(wx.HORIZONTAL)
         checkbox_1 = wx.CheckBox(panel, label='Case Sensitive')
         checkbox_1.SetFont(font)
-        horizontal_box_4.Add(checkbox_1)
+        horizontal_box_4.Add(checkbox_1, flag=wx.LEFT, border=10)
         check_box_2 = wx.CheckBox(panel, label='Nested Classes')
         check_box_2.SetFont(font)
         horizontal_box_4.Add(check_box_2, flag=wx.LEFT, border=10)
@@ -265,7 +265,7 @@ class GoToClass(wx.Frame):
 
         horizontal_box_5 = wx.BoxSizer(wx.HORIZONTAL)
         button_1 = wx.Button(panel, label='Ok', size=(70, 30))
-        horizontal_box_5.Add(button_1)
+        horizontal_box_5.Add(button_1, flag=wx.LEFT | wx.BOTTOM)
         button_2 = wx.Button(panel, label='Close', size=(70, 30))
         horizontal_box_5.Add(button_2, flag=wx.LEFT | wx.BOTTOM, border=5)
         vertical_box.Add(horizontal_box_5, flag=wx.ALIGN_RIGHT | wx.RIGHT, border=10)
@@ -275,8 +275,77 @@ class GoToClass(wx.Frame):
         self.Show()
 
 
+class Calculator(wx.Frame):
+
+    def __init__(self, parent, title):
+        super(Calculator, self).__init__(parent, title=title, size=(300, 250))
+        menu_bar = wx.MenuBar()
+        file_menu = wx.Menu()
+        menu_bar.Append(file_menu, '&File')
+        self.SetMenuBar(menu_bar)
+        vertical_box = wx.BoxSizer(wx.VERTICAL)
+        self.display = wx.TextCtrl(self, style=wx.TE_RIGHT)
+        vertical_box.Add(self.display, flag=wx.EXPAND | wx.TOP | wx.BOTTOM, border=4)
+        grid_sizer = wx.GridSizer(5, 4, 5, 5)
+
+        grid_sizer.AddMany([(wx.Button(self, label='Cls'), 0, wx.EXPAND),
+                            (wx.Button(self, label='Bck'), 0, wx.EXPAND),
+                            (wx.StaticText(self), wx.EXPAND),
+                            (wx.Button(self, label='Close'), 0, wx.EXPAND),
+                            (wx.Button(self, label='7'), 0, wx.EXPAND),
+                            (wx.Button(self, label='8'), 0, wx.EXPAND),
+                            (wx.Button(self, label='9'), 0, wx.EXPAND),
+                            (wx.Button(self, label='/'), 0, wx.EXPAND),
+                            (wx.Button(self, label='4'), 0, wx.EXPAND),
+                            (wx.Button(self, label='5'), 0, wx.EXPAND),
+                            (wx.Button(self, label='6'), 0, wx.EXPAND),
+                            (wx.Button(self, label='*'), 0, wx.EXPAND),
+                            (wx.Button(self, label='1'), 0, wx.EXPAND),
+                            (wx.Button(self, label='2'), 0, wx.EXPAND),
+                            (wx.Button(self, label='3'), 0, wx.EXPAND),
+                            (wx.Button(self, label='-'), 0, wx.EXPAND),
+                            (wx.Button(self, label='0'), 0, wx.EXPAND),
+                            (wx.Button(self, label='.'), 0, wx.EXPAND),
+                            (wx.Button(self, label='='), 0, wx.EXPAND),
+                            (wx.Button(self, label='+'), 0, wx.EXPAND)])
+
+        vertical_box.Add(grid_sizer, proportion=1, flag=wx.EXPAND)
+        self.SetSizer(vertical_box)
+        self.Center()
+        self.Show()
+
+
+class ReviewFrame(wx.Frame):
+
+    def __init__(self, parent, title):
+        super(ReviewFrame, self).__init__(parent, title=title, size=(300, 250))
+
+        panel = wx.Panel(self)
+        horizontal_box = wx.BoxSizer(wx.HORIZONTAL)
+        flex_grid_sizer = wx.FlexGridSizer(3, 2, 9, 25)
+        title = wx.StaticText(panel, label="Title")
+        author = wx.StaticText(panel, label="Author")
+        review = wx.StaticText(panel, label="Review")
+
+        text_control_1 = wx.TextCtrl(panel)
+        text_control_2 = wx.TextCtrl(panel)
+        text_control_3 = wx.TextCtrl(panel)
+
+        flex_grid_sizer.AddMany(
+            [title, (text_control_1, 1, wx.EXPAND), author, (text_control_2, 1, wx.EXPAND), (review, 1, wx.EXPAND),
+             (text_control_3, 1, wx.EXPAND)])
+        flex_grid_sizer.AddGrowableRow(2, 1)
+        flex_grid_sizer.AddGrowableCol(1, 1)
+
+        horizontal_box.Add(flex_grid_sizer, proportion=1, flag=wx.ALL | wx.EXPAND, border=15)
+        panel.SetSizer(horizontal_box)
+
+        self.Center()
+        self.Show()
+
+
 if __name__ == '__main__':
     print("Here it goes")
     app = wx.App()
-    GoToClass(None, 'Ashea akola')
+    ReviewFrame(None, '2020')
     app.MainLoop()
