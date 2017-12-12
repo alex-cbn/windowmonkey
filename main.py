@@ -212,8 +212,71 @@ class BoxFrame(wx.Frame):
         self.Show()
 
 
+class GoToClass(wx.Frame):
+
+    def __init__(self, parent, title):
+        super(GoToClass, self).__init__(parent, title=title, size=(390, 350))
+        panel = wx.Panel(self)
+
+        font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
+        font.SetPointSize(9)
+
+        vertical_box = wx.BoxSizer(wx.VERTICAL)
+
+        horizontal_box = wx.BoxSizer(wx.HORIZONTAL)
+        label = wx.StaticText(panel, label='Class Name')
+        label.SetFont(font)
+        horizontal_box.Add(label, flag=wx.RIGHT, border=8)
+        text_control = wx.TextCtrl(panel)
+        horizontal_box.Add(text_control, proportion=1)
+        vertical_box.Add(horizontal_box, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
+
+        vertical_box.Add((-1, 10))
+
+        horizontal_box_2 = wx.BoxSizer(wx.HORIZONTAL)
+        label2 = wx.StaticText(panel, label='Matching Classes')
+        label2.SetFont(font)
+        horizontal_box_2.Add(label2)
+        vertical_box.Add(horizontal_box_2, flag=wx.LEFT | wx.TOP, border=10)
+
+        vertical_box.Add((-1, 10))
+
+        horizontal_box_3 = wx.BoxSizer(wx.HORIZONTAL)
+        text_control_2 = wx.TextCtrl(panel, style=wx.TE_MULTILINE)
+        horizontal_box_3.Add(text_control_2, proportion=1, flag=wx.EXPAND)
+        vertical_box.Add(horizontal_box_3, proportion=1, flag=wx.LEFT | wx.RIGHT | wx.EXPAND,
+                         border=10)
+
+        vertical_box.Add((-1, 25))
+
+        horizontal_box_4 = wx.BoxSizer(wx.HORIZONTAL)
+        checkbox_1 = wx.CheckBox(panel, label='Case Sensitive')
+        checkbox_1.SetFont(font)
+        horizontal_box_4.Add(checkbox_1)
+        check_box_2 = wx.CheckBox(panel, label='Nested Classes')
+        check_box_2.SetFont(font)
+        horizontal_box_4.Add(check_box_2, flag=wx.LEFT, border=10)
+        check_box_3 = wx.CheckBox(panel, label='Non-Project classes')
+        check_box_3.SetFont(font)
+        horizontal_box_4.Add(check_box_3, flag=wx.LEFT, border=10)
+        vertical_box.Add(horizontal_box_4, flag=wx.LEFT, border=10)
+
+        vertical_box.Add((-1, 25))
+
+        horizontal_box_5 = wx.BoxSizer(wx.HORIZONTAL)
+        button_1 = wx.Button(panel, label='Ok', size=(70, 30))
+        horizontal_box_5.Add(button_1)
+        button_2 = wx.Button(panel, label='Close', size=(70, 30))
+        horizontal_box_5.Add(button_2, flag=wx.LEFT | wx.BOTTOM, border=5)
+        vertical_box.Add(horizontal_box_5, flag=wx.ALIGN_RIGHT | wx.RIGHT, border=10)
+
+        panel.SetSizer(vertical_box)
+        self.Center()
+        self.Show()
+
+
 if __name__ == '__main__':
     print("Here it goes")
     app = wx.App()
-    BoxFrame(None, "Cyka Blyat")
+    GoToClass(None, 'Ashea akola')
     app.MainLoop()
