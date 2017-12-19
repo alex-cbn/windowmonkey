@@ -344,8 +344,96 @@ class ReviewFrame(wx.Frame):
         self.Show()
 
 
+class Example(wx.Frame):
+
+    def __init__(self, parent, title):
+        super(Example, self).__init__(parent, title=title,
+                                      size=(320, 130))
+
+        self.InitUI()
+        self.Centre()
+        self.Show()
+
+    def InitUI(self):
+        panel = wx.Panel(self)
+        sizer = wx.GridBagSizer(4, 4)
+
+        text = wx.StaticText(panel, label="Rename To")
+        sizer.Add(text, pos=(0, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
+
+        tc = wx.TextCtrl(panel)
+        sizer.Add(tc, pos=(1, 0), span=(1, 5),
+                  flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=5)
+
+        buttonOk = wx.Button(panel, label="Ok", size=(90, 28))
+        buttonClose = wx.Button(panel, label="Close", size=(90, 28))
+        sizer.Add(buttonOk, pos=(3, 3))
+        sizer.Add(buttonClose, pos=(3, 4), flag=wx.RIGHT | wx.BOTTOM, border=5)
+
+        sizer.AddGrowableCol(1)
+        sizer.AddGrowableRow(2)
+        panel.SetSizerAndFit(sizer)
+
+
+class Proof(wx.Frame):
+
+    def add_simple_field(self, name):  # syntactic sugar here
+        name = name.replace(' ', '_')
+        setattr(self, 'label_' + name.lower(), wx.StaticText(self.panel, label=name.replace('_', ' ')))
+        setattr(self, 'text_' + name.lower(), wx.TextCtrl(self.panel))
+        exec(
+            "self.sizer.Add(self.label_" + name.lower() + ", pos=(" + str(self.counter) +
+            ", 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)")
+        exec(
+            'self.sizer.Add(self.text_' + name.lower() + ', pos=(' + str(self.counter) +
+            ', 1), span=(1, 3), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)')
+        self.counter = self.counter + 1
+
+    def add_line(self, label, text, position):
+        self.sizer.Add(label, pos=(position, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
+        self.sizer.Add(text, pos=(position, 1), span=(1, 3), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
+
+    def __init__(self, parent, title):
+        super(Proof, self).__init__(parent, title=title, size=(450, 550))
+
+        self.panel = wx.Panel(self)
+        self.sizer = wx.GridBagSizer(5, 5)
+
+        self.counter = 0
+
+        label_email = wx.StaticText(self.panel, label="Email")
+        self.sizer.Add(label_email, pos=(0, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
+        text_email = wx.TextCtrl(self.panel)
+        self.sizer.Add(text_email, pos=(0, 1), span=(1, 3), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
+
+        label_password = wx.StaticText(self.panel, label="Password")
+        self.sizer.Add(label_password, pos=(1, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
+        text_password = wx.TextCtrl(self.panel, style=wx.TE_PASSWORD)
+        self.sizer.Add(text_password, pos=(1, 1), span=(1, 3), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
+
+        label_homework = wx.StaticText(self.panel, label="Homework")
+        text_homework = wx.TextCtrl(self.panel)
+        self.add_line(label_homework, text_homework, 2)
+
+        self.counter = 3
+        self.add_simple_field('REGEX subject')
+        self.add_simple_field('REGEX zip')
+        self.add_simple_field('Email Server')
+        self.add_simple_field('Email server port')
+        self.add_simple_field('Email Subject')
+        self.add_simple_field('API Scope')
+        self.add_simple_field('API Key')
+        self.add_simple_field('Spreadsheet ID')
+
+        self.sizer.AddGrowableCol(1)
+
+        self.panel.SetSizerAndFit(self.sizer)
+        self.Center()
+        self.Show()
+
+
 if __name__ == '__main__':
     print("Here it goes")
     app = wx.App()
-    ReviewFrame(None, '2020')
+    Proof(None, 'Rolex')
     app.MainLoop()
