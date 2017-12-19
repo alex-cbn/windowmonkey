@@ -377,6 +377,12 @@ class Example(wx.Frame):
 
 class Proof(wx.Frame):
 
+    def list_to_string(self, list):
+        result = ""
+        for element in list:
+            result = result + element + ", "
+        return result[:len(result)-2]
+
     def add_simple_field(self, name):  # syntactic sugar here
         name = name.replace(' ', '_')
         setattr(self, 'label_' + name.lower(), wx.StaticText(self.panel, label=name.replace('_', ' ')))
@@ -386,50 +392,81 @@ class Proof(wx.Frame):
             ", 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)")
         exec(
             'self.sizer.Add(self.text_' + name.lower() + ', pos=(' + str(self.counter) +
-            ', 1), span=(1, 3), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)')
+            ', 1), span=(1, 4), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)')
         self.counter = self.counter + 1
 
     def add_line(self, label, text, position):
         self.sizer.Add(label, pos=(position, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
-        self.sizer.Add(text, pos=(position, 1), span=(1, 3), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
+        self.sizer.Add(text, pos=(position, 1), span=(1, 1), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
 
     def __init__(self, parent, title):
-        super(Proof, self).__init__(parent, title=title, size=(450, 550))
+        super(Proof, self).__init__(parent, title=title, size=(550, 900))
 
         self.panel = wx.Panel(self)
         self.sizer = wx.GridBagSizer(5, 5)
 
         self.counter = 0
 
-        label_email = wx.StaticText(self.panel, label="Email")
-        self.sizer.Add(label_email, pos=(0, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
-        text_email = wx.TextCtrl(self.panel)
-        self.sizer.Add(text_email, pos=(0, 1), span=(1, 3), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
+        self.add_simple_field('Timeout')
+        self.add_simple_field('Homework')
+        self.add_simple_field('Email Address')
 
         label_password = wx.StaticText(self.panel, label="Password")
-        self.sizer.Add(label_password, pos=(1, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
+        self.sizer.Add(label_password, pos=(3, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
         text_password = wx.TextCtrl(self.panel, style=wx.TE_PASSWORD)
-        self.sizer.Add(text_password, pos=(1, 1), span=(1, 3), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
+        self.sizer.Add(text_password, pos=(3, 1), span=(1, 4), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
+        self.counter = self.counter + 1  # password field
 
-        label_homework = wx.StaticText(self.panel, label="Homework")
-        text_homework = wx.TextCtrl(self.panel)
-        self.add_line(label_homework, text_homework, 2)
-
-        self.counter = 3
-        self.add_simple_field('REGEX subject')
-        self.add_simple_field('REGEX zip')
         self.add_simple_field('Email Server')
-        self.add_simple_field('Email server port')
-        self.add_simple_field('Email Subject')
-        self.add_simple_field('API Scope')
-        self.add_simple_field('API Key')
-        self.add_simple_field('Spreadsheet ID')
+        self.add_simple_field('Email Server Port')
+        self.add_simple_field('Imap Server Address')
+        self.add_simple_field('Subject')
+        self.add_simple_field('Zip Format')
+        self.add_simple_field('Grade Email Subject')
+        self.add_simple_field('Grade Email Body')
+        self.add_simple_field('SheetsScopes')
+        self.add_simple_field('Sheets Application Name')
+        self.add_simple_field('Sheets Key')
+        self.add_simple_field('Sheets Id')
+        self.add_simple_field('Build String')
+        self.add_simple_field('Exe Filename')
+        self.add_simple_field('Checker Path')
+
+        self.button_checker_path = wx.Button(self.panel, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnCheckerPathBrowse, self.button_checker_path)
+        self.sizer.Add(self.button_checker_path, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
+        self.counter = self.counter + 1
+
+        self.add_simple_field('Relative Download Path')
+        self.add_simple_field('Relative Checker Path')
+        self.add_simple_field('Input Files')
+        self.button_in_files = wx.Button(self.panel, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnInFilesBrowser, self.button_in_files)
+        self.sizer.Add(self.button_in_files, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
+        self.counter = self.counter + 1
+        self.add_simple_field('Output Files')
+        self.add_simple_field('Reference Files')
 
         self.sizer.AddGrowableCol(1)
 
         self.panel.SetSizerAndFit(self.sizer)
         self.Center()
         self.Show()
+
+    def OnCheckerPathBrowse(self, e):
+        dialog_checker_path = wx.DirDialog(self.panel, "Choose Checker Path", "",
+                                           wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
+        if (dialog_checker_path.ShowModal() == wx.ID_OK):
+            chosen_path = dialog_checker_path.GetPath()
+            self.text_checker_path.SetValue(chosen_path)
+
+    def OnInFilesBrowser(self, e):
+        dialog_in_files = wx.FileDialog(self.panel, "Choose Input Files", "", "", "All files (*.*)|*.*",
+                                        wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
+        if (dialog_in_files.ShowModal() == wx.ID_OK):
+            all_files_path = dialog_in_files.GetPaths()
+            all_files_names = dialog_in_files.GetFilenames()
+            self.text_input_files.SetValue(self.list_to_string(all_files_names))
 
 
 if __name__ == '__main__':
