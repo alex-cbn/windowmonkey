@@ -400,7 +400,7 @@ class Proof(wx.Frame):
         self.sizer.Add(text, pos=(position, 1), span=(1, 1), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
 
     def __init__(self, parent, title):
-        super(Proof, self).__init__(parent, title=title, size=(550, 900))
+        super(Proof, self).__init__(parent, title=title, size=(550, 400))
 
         self.panel = wx.Panel(self)
         self.sizer = wx.GridBagSizer(5, 5)
@@ -445,7 +445,15 @@ class Proof(wx.Frame):
         self.sizer.Add(self.button_in_files, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
         self.counter = self.counter + 1
         self.add_simple_field('Output Files')
+        self.button_out_files = wx.Button(self.panel, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnOutFilesBrowser, self.button_out_files)
+        self.sizer.Add(self.button_out_files, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
+        self.counter = self.counter + 1
         self.add_simple_field('Reference Files')
+        self.button_refrence_files = wx.Button(self.panel, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnOutFilesBrowser, self.button_refrence_files)
+        self.sizer.Add(self.button_refrence_files, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
+        self.counter = self.counter + 1
 
         self.sizer.AddGrowableCol(1)
 
@@ -467,6 +475,22 @@ class Proof(wx.Frame):
             all_files_path = dialog_in_files.GetPaths()
             all_files_names = dialog_in_files.GetFilenames()
             self.text_input_files.SetValue(self.list_to_string(all_files_names))
+
+    def OnOutFilesBrowser(self, e):
+        dialog_out_files = wx.FileDialog(self.panel, "Choose Output Files", "", "", "All files (*.*)|*.*",
+                                        wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
+        if (dialog_out_files.ShowModal() == wx.ID_OK):
+            all_files_path = dialog_out_files.GetPaths()
+            all_files_names = dialog_out_files.GetFilenames()
+            self.text_output_files.SetValue(self.list_to_string(all_files_names))
+
+    def OnReferenceFilesBrowser(self, e):
+        dialog_reference_files = wx.FileDialog(self.panel, "Choose Reference Files", "", "", "All files (*.*)|*.*",
+                                        wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
+        if (dialog_reference_files.ShowModal() == wx.ID_OK):
+            all_files_path = dialog_reference_files.GetPaths()
+            all_files_names = dialog_reference_files.GetFilenames()
+            self.text_reference_files.SetValue(self.list_to_string(all_files_names))
 
 
 if __name__ == '__main__':
