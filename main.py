@@ -1,4 +1,5 @@
 import wx
+import wx.lib.scrolledpanel as LibScrolledPanel
 
 APP_EXIT = 1
 
@@ -381,7 +382,7 @@ class Proof(wx.Frame):
         result = ""
         for element in list:
             result = result + element + ", "
-        return result[:len(result)-2]
+        return result[:len(result) - 2]
 
     def add_simple_field(self, name):  # syntactic sugar here
         name = name.replace(' ', '_')
@@ -402,7 +403,23 @@ class Proof(wx.Frame):
     def __init__(self, parent, title):
         super(Proof, self).__init__(parent, title=title, size=(550, 400))
 
-        self.panel = wx.Panel(self)
+        menu_bar = wx.MenuBar()
+        file_menu = wx.Menu()
+        file_menu_new = wx.MenuItem(file_menu, wx.ID_NEW, '&New')
+        file_menu_open = wx.MenuItem(file_menu, wx.ID_OPEN, '&Open')
+        file_menu_save = wx.MenuItem(file_menu, wx.ID_SAVE, '&Save')
+        file_menu.Append(file_menu_new)
+        file_menu.Append(file_menu_open)
+        file_menu.Append(file_menu_save)
+        file_menu_exit = wx.MenuItem(file_menu, wx.ID_EXIT, '&Ankide\tCtrl+A')
+        file_menu.Append(file_menu_exit)
+        self.Bind(wx.EVT_MENU, self.OnQuit, file_menu_exit)
+        menu_bar.Append(file_menu, '&File')
+        self.SetMenuBar(menu_bar)
+
+        self.panel = wx.lib.scrolledpanel.ScrolledPanel(self, -1, style=wx.TAB_TRAVERSAL, name='Panel')
+        self.panel.SetAutoLayout(1)
+        self.panel.SetupScrolling()
         self.sizer = wx.GridBagSizer(5, 5)
 
         self.counter = 0
@@ -478,7 +495,7 @@ class Proof(wx.Frame):
 
     def OnOutFilesBrowser(self, e):
         dialog_out_files = wx.FileDialog(self.panel, "Choose Output Files", "", "", "All files (*.*)|*.*",
-                                        wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
+                                         wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
         if (dialog_out_files.ShowModal() == wx.ID_OK):
             all_files_path = dialog_out_files.GetPaths()
             all_files_names = dialog_out_files.GetFilenames()
@@ -486,15 +503,18 @@ class Proof(wx.Frame):
 
     def OnReferenceFilesBrowser(self, e):
         dialog_reference_files = wx.FileDialog(self.panel, "Choose Reference Files", "", "", "All files (*.*)|*.*",
-                                        wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
+                                               wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
         if (dialog_reference_files.ShowModal() == wx.ID_OK):
             all_files_path = dialog_reference_files.GetPaths()
             all_files_names = dialog_reference_files.GetFilenames()
             self.text_reference_files.SetValue(self.list_to_string(all_files_names))
 
+    def OnQuit(self, e):
+        self.Close()
+
 
 if __name__ == '__main__':
     print("Here it goes")
     app = wx.App()
-    Proof(None, 'Rolex')
+    Proof(None, 'ConfMe')
     app.MainLoop()
