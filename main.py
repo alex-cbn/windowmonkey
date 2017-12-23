@@ -569,6 +569,7 @@ class Proof(wx.Frame):
         pathname = dialog_save.GetPath()
         self.UpdateConfiguration()
         self.WriteConfiguration(pathname)
+        self.OpenedConfigPath = pathname
 
     def UpdateConfiguration(self):
         for item in self.ConfigurationDictionary.keys():
