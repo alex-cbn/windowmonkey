@@ -1,3 +1,5 @@
+import re
+
 import wx
 import wx.lib.scrolledpanel as LibScrolledPanel
 
@@ -381,8 +383,11 @@ class Proof(wx.Frame):
     def list_to_string(self, list):
         result = ""
         for element in list:
-            result = result + element + ", "
-        return result[:len(result) - 2]
+            result = result + '\'' + element + '\'' + ", "
+        result = result[:len(result) - 2]
+        result = '[' + result + ']'
+        result = result.replace('\\', "\\\\")
+        return result
 
     def add_simple_field(self, name):  # syntactic sugar here
         name = name.replace(' ', '_')
@@ -394,6 +399,7 @@ class Proof(wx.Frame):
         exec(
             'self.sizer.Add(self.text_' + name.lower() + ', pos=(' + str(self.counter) +
             ', 1), span=(1, 4), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)')
+        self.ConfigurationDictionary.update({name.replace('_', ' '): ''})
         self.counter = self.counter + 1
 
     def add_line(self, label, text, position):
@@ -403,17 +409,26 @@ class Proof(wx.Frame):
     def __init__(self, parent, title):
         super(Proof, self).__init__(parent, title=title, size=(550, 400))
 
+        self.ConfigurationDictionary = dict()
+        self.OpenedConfigPath = ""
+
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
         file_menu_new = wx.MenuItem(file_menu, wx.ID_NEW, '&New')
         file_menu_open = wx.MenuItem(file_menu, wx.ID_OPEN, '&Open')
         file_menu_save = wx.MenuItem(file_menu, wx.ID_SAVE, '&Save')
+        file_menu_save_as = wx.MenuItem(file_menu, wx.ID_SAVEAS, 'Save &As')
         file_menu.Append(file_menu_new)
         file_menu.Append(file_menu_open)
         file_menu.Append(file_menu_save)
-        file_menu_exit = wx.MenuItem(file_menu, wx.ID_EXIT, '&Ankide\tCtrl+A')
+        file_menu.Append(file_menu_save_as)
+        file_menu_exit = wx.MenuItem(file_menu, wx.ID_EXIT, 'E&xit\tCtrl+X')
         file_menu.Append(file_menu_exit)
         self.Bind(wx.EVT_MENU, self.OnQuit, file_menu_exit)
+        self.Bind(wx.EVT_MENU, self.OnNew, file_menu_new)
+        self.Bind(wx.EVT_MENU, self.OnOpen, file_menu_open)
+        self.Bind(wx.EVT_MENU, self.OnSave, file_menu_save)
+        self.Bind(wx.EVT_MENU, self.OnSaveAs, file_menu_save_as)
         menu_bar.Append(file_menu, '&File')
         self.SetMenuBar(menu_bar)
 
@@ -428,11 +443,13 @@ class Proof(wx.Frame):
         self.add_simple_field('Homework')
         self.add_simple_field('Email Address')
 
-        label_password = wx.StaticText(self.panel, label="Password")
-        self.sizer.Add(label_password, pos=(3, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
-        text_password = wx.TextCtrl(self.panel, style=wx.TE_PASSWORD)
-        self.sizer.Add(text_password, pos=(3, 1), span=(1, 4), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)
+        self.label_password = wx.StaticText(self.panel, label="Password")
+        self.sizer.Add(self.label_password, pos=(3, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
+        self.text_password = wx.TextCtrl(self.panel, style=wx.TE_PASSWORD)
+        self.sizer.Add(self.text_password, pos=(3, 1), span=(1, 4), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP,
+                       border=5)
         self.counter = self.counter + 1  # password field
+        self.ConfigurationDictionary.update({'Password': ''})
 
         self.add_simple_field('Email Server')
         self.add_simple_field('Email Server Port')
@@ -441,13 +458,20 @@ class Proof(wx.Frame):
         self.add_simple_field('Zip Format')
         self.add_simple_field('Grade Email Subject')
         self.add_simple_field('Grade Email Body')
-        self.add_simple_field('SheetsScopes')
+
+        self.add_simple_field('Sheets Secret')
+        self.button_secret_file = wx.Button(self.panel, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnSecretFileBrowser, self.button_secret_file)
+        self.sizer.Add(self.button_secret_file, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
+        self.counter = self.counter + 1
+
+        self.add_simple_field('Sheets Scopes')
         self.add_simple_field('Sheets Application Name')
         self.add_simple_field('Sheets Key')
         self.add_simple_field('Sheets Id')
         self.add_simple_field('Build String')
         self.add_simple_field('Exe Filename')
-        self.add_simple_field('Checker Path')
+        self.add_simple_field('Absolute Path')
 
         self.button_checker_path = wx.Button(self.panel, label="Browse...", size=(70, 30))
         self.Bind(wx.EVT_BUTTON, self.OnCheckerPathBrowse, self.button_checker_path)
@@ -456,20 +480,23 @@ class Proof(wx.Frame):
 
         self.add_simple_field('Relative Download Path')
         self.add_simple_field('Relative Checker Path')
+
         self.add_simple_field('Input Files')
         self.button_in_files = wx.Button(self.panel, label="Browse...", size=(70, 30))
         self.Bind(wx.EVT_BUTTON, self.OnInFilesBrowser, self.button_in_files)
         self.sizer.Add(self.button_in_files, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
         self.counter = self.counter + 1
+
         self.add_simple_field('Output Files')
         self.button_out_files = wx.Button(self.panel, label="Browse...", size=(70, 30))
         self.Bind(wx.EVT_BUTTON, self.OnOutFilesBrowser, self.button_out_files)
         self.sizer.Add(self.button_out_files, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
         self.counter = self.counter + 1
+
         self.add_simple_field('Reference Files')
-        self.button_refrence_files = wx.Button(self.panel, label="Browse...", size=(70, 30))
-        self.Bind(wx.EVT_BUTTON, self.OnOutFilesBrowser, self.button_refrence_files)
-        self.sizer.Add(self.button_refrence_files, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
+        self.button_reference_files = wx.Button(self.panel, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnReferenceFilesBrowser, self.button_reference_files)
+        self.sizer.Add(self.button_reference_files, pos=(self.counter, 4), flag=wx.EXPAND | wx.RIGHT, border=5)
         self.counter = self.counter + 1
 
         self.sizer.AddGrowableCol(1)
@@ -481,36 +508,110 @@ class Proof(wx.Frame):
     def OnCheckerPathBrowse(self, e):
         dialog_checker_path = wx.DirDialog(self.panel, "Choose Checker Path", "",
                                            wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
-        if (dialog_checker_path.ShowModal() == wx.ID_OK):
+        if dialog_checker_path.ShowModal() == wx.ID_OK:
             chosen_path = dialog_checker_path.GetPath()
-            self.text_checker_path.SetValue(chosen_path)
+            self.text_absolute_path.SetValue(chosen_path)
+
+    def OnSecretFileBrowser(self, e):
+        dialog_secret_file = wx.FileDialog(self.panel, "Choose Secret File", "", "", "Json file (*.json)|*.json",
+                                           wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        if dialog_secret_file.ShowModal() == wx.ID_OK:
+            secret_path = dialog_secret_file.GetPath()
+            self.text_sheets_secret.SetValue(secret_path)
 
     def OnInFilesBrowser(self, e):
         dialog_in_files = wx.FileDialog(self.panel, "Choose Input Files", "", "", "All files (*.*)|*.*",
                                         wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
         if (dialog_in_files.ShowModal() == wx.ID_OK):
             all_files_path = dialog_in_files.GetPaths()
-            all_files_names = dialog_in_files.GetFilenames()
-            self.text_input_files.SetValue(self.list_to_string(all_files_names))
+            self.text_input_files.SetValue(self.list_to_string(all_files_path))
 
     def OnOutFilesBrowser(self, e):
         dialog_out_files = wx.FileDialog(self.panel, "Choose Output Files", "", "", "All files (*.*)|*.*",
                                          wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
         if (dialog_out_files.ShowModal() == wx.ID_OK):
             all_files_path = dialog_out_files.GetPaths()
-            all_files_names = dialog_out_files.GetFilenames()
-            self.text_output_files.SetValue(self.list_to_string(all_files_names))
+            self.text_output_files.SetValue(self.list_to_string(all_files_path))
 
     def OnReferenceFilesBrowser(self, e):
         dialog_reference_files = wx.FileDialog(self.panel, "Choose Reference Files", "", "", "All files (*.*)|*.*",
                                                wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
-        if (dialog_reference_files.ShowModal() == wx.ID_OK):
+        if dialog_reference_files.ShowModal() == wx.ID_OK:
             all_files_path = dialog_reference_files.GetPaths()
-            all_files_names = dialog_reference_files.GetFilenames()
-            self.text_reference_files.SetValue(self.list_to_string(all_files_names))
+            self.text_reference_files.SetValue(self.list_to_string(all_files_path))
 
     def OnQuit(self, e):
         self.Close()
+
+    def OnNew(self, e):
+        self.Close()
+
+    def OnOpen(self, e):
+        dialog_open = wx.FileDialog(self.panel, "Import Configuration", "", "", "Python Configuration (*.py)|*.py",
+                                    wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        if dialog_open.ShowModal() == wx.ID_OK:
+            self.OpenedConfigPath = dialog_open.GetPath()
+            self.ReadConfiguration(self.OpenedConfigPath)
+            self.LoadConfiguration()
+
+    def OnSave(self, e):
+        if self.OpenedConfigPath == "":
+            self.OnSaveAs(e)
+        else:
+            self.UpdateConfiguration()
+            self.WriteConfiguration(self.OpenedConfigPath)
+
+    def OnSaveAs(self, e):
+        dialog_save = wx.FileDialog(self.panel, "Save Configuration", wildcard=".py files (*.py)|*.py",
+                                    style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        if dialog_save.ShowModal() == wx.ID_CANCEL:
+            return
+        pathname = dialog_save.GetPath()
+        self.UpdateConfiguration()
+        self.WriteConfiguration(pathname)
+
+    def UpdateConfiguration(self):
+        for item in self.ConfigurationDictionary.keys():
+            var_name = item
+            var_name = var_name.replace(' ', '_')
+            var_name = var_name.lower()
+            var_name = 'self.text_' + var_name
+            command = 'self.ConfigurationDictionary.update({\'' + item + '\':' + var_name + '.GetValue()})'
+            exec(command)
+
+    def WriteConfiguration(self, filename):
+        try:
+            with open(filename, 'w') as file:
+                for item in self.ConfigurationDictionary.keys():
+                    line = item.replace(' ', '') + ' = ' + '\"' + self.ConfigurationDictionary[item] + '\"\n'
+                    file.write(line)
+        except IOError:
+            wx.LogError('Fak')
+
+    def LoadConfiguration(self):
+        for item in self.ConfigurationDictionary.keys():
+            var_name = item
+            var_name = var_name.replace(' ', '_')
+            var_name = var_name.lower()
+            var_name = 'self.text_' + var_name
+            command = var_name + '.SetValue(' + self.ConfigurationDictionary[item] + ')'
+            exec(command)
+
+    def ReadConfiguration(self, filename):
+        try:
+            with open(filename, 'r') as file:
+                line = file.readline()
+                while line:
+                    if line != "":
+                        left = line.split('=')[0]
+                        right = line.split('=')[1]
+                        left = left.strip()
+                        right = right.strip()
+                        left = re.sub("([a-z])([A-Z])", "\g<1> \g<2>", left)
+                        self.ConfigurationDictionary.update({left: right})
+                    line = file.readline()
+        except IOError:
+            wx.LogError('Fak')
 
 
 if __name__ == '__main__':
