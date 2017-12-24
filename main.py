@@ -109,7 +109,6 @@ class MenuItemTypes(wx.Frame):
         view_menu.Append(self.view_menu_show_statubar)
         self.view_menu_show_statubar.Check(True)
         self.view_menu_show_toolbar.Check(True)
-
         self.Bind(wx.EVT_MENU, self.ToggleToolBar, self.view_menu_show_toolbar)
         self.Bind(wx.EVT_MENU, self.ToggleStatusBar, self.view_menu_show_statubar)
         menu_bar.Append(file_menu, '&File')
@@ -544,7 +543,10 @@ class Proof(wx.Frame):
         self.Close()
 
     def OnNew(self, e):
-        self.Close()
+        self.OpenedConfigPath = ""
+        for item in self.ConfigurationDictionary:
+            self.ConfigurationDictionary.update({item: ' '})
+        self.LoadConfiguration()
 
     def OnOpen(self, e):
         dialog_open = wx.FileDialog(self.panel, "Import Configuration", "", "", "Python Configuration (*.py)|*.py",
@@ -595,7 +597,10 @@ class Proof(wx.Frame):
             var_name = var_name.replace(' ', '_')
             var_name = var_name.lower()
             var_name = 'self.text_' + var_name
-            command = var_name + '.SetValue(' + self.ConfigurationDictionary[item] + ')'
+            itemvalue = self.ConfigurationDictionary[item]
+            if itemvalue == " ":
+                itemvalue = ""
+            command = var_name + '.SetValue(\'' + itemvalue + '\')'
             exec(command)
 
     def ReadConfiguration(self, filename):
@@ -608,6 +613,7 @@ class Proof(wx.Frame):
                         right = line.split('=')[1]
                         left = left.strip()
                         right = right.strip()
+                        right = right.replace('\"', "")
                         left = re.sub("([a-z])([A-Z])", "\g<1> \g<2>", left)
                         self.ConfigurationDictionary.update({left: right})
                     line = file.readline()
