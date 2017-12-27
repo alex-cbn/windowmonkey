@@ -669,14 +669,25 @@ class MainWindowTabbed(wx.Frame):
         file_menu.Append(file_menu_open)
         file_menu.Append(file_menu_save)
         file_menu.Append(file_menu_save_as)
+        file_menu.AppendSeparator()
         file_menu_exit = wx.MenuItem(file_menu, wx.ID_EXIT, 'E&xit\tCtrl+X')
         file_menu.Append(file_menu_exit)
+        help_menu = wx.Menu()
+        help_menu_help = wx.MenuItem(help_menu, wx.ID_ANY, '&Help')
+        help_menu_about = wx.MenuItem(help_menu, wx.ID_ANY, '&About')
+        help_menu.Append(help_menu_help)
+        help_menu.AppendSeparator()
+        help_menu.Append(help_menu_about)
+
         self.Bind(wx.EVT_MENU, self.OnQuit, file_menu_exit)
         self.Bind(wx.EVT_MENU, self.OnNew, file_menu_new)
         self.Bind(wx.EVT_MENU, self.OnOpen, file_menu_open)
         self.Bind(wx.EVT_MENU, self.OnSave, file_menu_save)
         self.Bind(wx.EVT_MENU, self.OnSaveAs, file_menu_save_as)
+        self.Bind(wx.EVT_MENU, self.OnHelp, help_menu_help)
+        self.Bind(wx.EVT_MENU, self.OnAbout, help_menu_about)
         menu_bar.Append(file_menu, '&File')
+        menu_bar.Append(help_menu, 'Hel&p')
         self.SetMenuBar(menu_bar)
 
         self.main_panel = wx.Panel(self)
@@ -728,6 +739,12 @@ class MainWindowTabbed(wx.Frame):
         self.tab_1.UpdateConfiguration()
         self.tab_1.WriteConfiguration(pathname)
         self.tab_1.OpenedConfigPath = pathname
+
+    def OnHelp(self, e):
+        help_window = HelpWindow(self)
+
+    def OnAbout(self, e):
+        about_window = AboutWindow(self)
 
 
 class MainWindow(wx.Frame):
@@ -976,6 +993,33 @@ class MainWindow(wx.Frame):
                     line = file.readline()
         except IOError:
             wx.LogError('Fak')
+
+
+class AboutWindow(wx.Frame):
+
+    def __init__(self, parent):
+        super(AboutWindow, self).__init__(parent=parent, title='About', size=(250, 200))
+        panel = wx.Panel(self)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        label = wx.StaticText(panel, id=wx.ID_ANY,
+                              label="\n\n\n   Developed by yours truly...\n    Alex Ciobanu 2017")
+        sizer.Add(label)
+        panel.SetSizer(sizer)
+        self.Center()
+        self.Show()
+
+
+class HelpWindow(wx.Frame):
+
+    def __init__(self, parent):
+        super(HelpWindow, self).__init__(parent=parent, title='Help', size=(250, 200))
+        panel = wx.Panel(self)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        label = wx.StaticText(panel, id=wx.ID_ANY, label="\n\n\n   Please Consider reading the readme first...\n    Much appreciated")
+        sizer.Add(label)
+        panel.SetSizer(sizer)
+        self.Center()
+        self.Show()
 
 
 if __name__ == '__main__':
