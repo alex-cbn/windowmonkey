@@ -393,12 +393,11 @@ class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
         name = name.replace(' ', '_')
         setattr(self, 'label_' + name.lower(), wx.StaticText(self, label=name.replace('_', ' ')))
         setattr(self, 'text_' + name.lower(), wx.TextCtrl(self))
-        setattr(self, 'sizer_' + name.lower(), wx.BoxSizer(wx.HORIZONTAL))
-        cmd = "self.sizer_" + name.lower() + ".Add(self.label_" + name.lower() + ", flag= wx.LEFT | wx.TOP | wx.RIGHT , border=5)"
+        cmd = parent + ".Add(self.label_" + name.lower() + ", pos=(" + \
+              str(self.counter) + ", 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)"
         exec(cmd)
-        cmd = "self.sizer_" + name.lower() + ".Add(self.text_" + name.lower() + ",proportion=1, flag=wx.TOP| wx.LEFT |wx.RIGHT| wx.EXPAND, border=5)"
-        exec(cmd)
-        cmd = parent + '.Add(self.sizer_' + name.lower() + ', flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)'
+        cmd = parent + ".Add(self.text_" + name.lower() + ', pos=(' + str(
+            self.counter) + ', 1), span=(1, 4), flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP, border=5)'
         exec(cmd)
         self.ConfigurationDictionary.update({name.replace('_', ' '): ''})
         self.counter = self.counter + 1
@@ -416,6 +415,129 @@ class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
         self.ConfigurationDictionary.update({name.replace('_', ' '): ''})
         self.counter = self.counter + 1
 
+    def InitStarter(self):
+        self.StarterOptionBox = wx.StaticBox(self, label="Starter Options")
+        self.StarterOptionBoxSizer = wx.StaticBoxSizer(self.StarterOptionBox, wx.VERTICAL)
+        self.StarterGrid = wx.GridBagSizer(5, 5)
+        self.counter = 0
+
+        self.add_field_parent('Timeout', 'self.StarterGrid')
+
+        self.StarterGrid.AddGrowableCol(1)
+        self.StarterOptionBoxSizer.Add(self.StarterGrid, flag=wx.EXPAND | wx.LEFT | wx.TOP | wx.RIGHT | wx.BOTTOM)
+        self.sizer.Add(self.StarterOptionBoxSizer, pos=(0, 0), span=(1, 5),
+                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.RIGHT | wx.BOTTOM, border=5)
+
+    def InitEmail(self):
+        self.EmailOptionBox = wx.StaticBox(self, label="Email Options")
+        self.EmailOptionBoxSizer = wx.StaticBoxSizer(self.EmailOptionBox, wx.VERTICAL)
+        self.EmailGrid = wx.GridBagSizer(5, 5)
+        self.counter = 0
+
+        self.add_field_parent('Email Address', 'self.EmailGrid')
+
+        self.label_password = wx.StaticText(self, label="Password")
+        self.EmailGrid.Add(self.label_password, pos=(self.counter, 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM,
+                           border=5)
+        self.text_password = wx.TextCtrl(self, style=wx.TE_PASSWORD)
+        self.EmailGrid.Add(self.text_password, pos=(self.counter, 1), span=(1, 4),
+                           flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.TOP,
+                           border=5)
+        self.ConfigurationDictionary.update({'Password': ''})
+        self.counter = self.counter + 1
+
+        self.add_field_parent('Email Server Address', 'self.EmailGrid')
+        self.add_field_parent('Email Server Port', 'self.EmailGrid')
+        self.add_field_parent('Imap Server Address', 'self.EmailGrid')
+        self.add_field_parent('Subject', 'self.EmailGrid')
+        self.add_field_parent('Zip Format', 'self.EmailGrid')
+        self.add_field_parent('Grade Email Subject', 'self.EmailGrid')
+        self.add_field_parent('Grade Email Body', 'self.EmailGrid')
+
+        self.EmailGrid.AddGrowableCol(1)
+        self.EmailOptionBoxSizer.Add(self.EmailGrid, flag=wx.EXPAND | wx.LEFT | wx.TOP | wx.RIGHT | wx.BOTTOM)
+        self.sizer.Add(self.EmailOptionBoxSizer, pos=(1, 0), span=(1, 5),
+                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.BOTTOM, border=5)
+
+    def InitSheets(self):
+        self.SheetsOptionBox = wx.StaticBox(self, label="Sheets Options")
+        self.SheetsOptionBoxSizer = wx.StaticBoxSizer(self.SheetsOptionBox, wx.VERTICAL)
+        self.SheetsGrid = wx.GridBagSizer(5, 5)
+        self.counter = 0
+
+        self.add_field_parent('Sheets Secret File', 'self.SheetsGrid')
+        self.button_secret_file = wx.Button(self, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnSecretFileBrowser, self.button_secret_file)
+        self.SheetsGrid.Add(self.button_secret_file, pos=(self.counter, 4), span=(1, 1), flag=wx.EXPAND | wx.RIGHT,
+                            border=5)
+        self.counter = self.counter + 1
+
+        self.add_field_parent('Sheets Scopes', 'self.SheetsGrid')
+        self.add_field_parent('Sheets Application Name', 'self.SheetsGrid')
+        self.add_field_parent('Sheets Key', 'self.SheetsGrid')
+        self.add_field_parent('Sheets Id', 'self.SheetsGrid')
+
+        self.SheetsGrid.AddGrowableCol(1)
+        self.SheetsOptionBoxSizer.Add(self.SheetsGrid, flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.LEFT | wx.RIGHT)
+        self.sizer.Add(self.SheetsOptionBoxSizer, pos=(2, 0), span=(1, 5),
+                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.BOTTOM, border=5)
+
+    def InitHomework(self):
+        self.HomeworkOptionBox = wx.StaticBox(self, label="Homework Options")
+        self.HomeworkOptionBoxSizer = wx.StaticBoxSizer(self.HomeworkOptionBox, wx.VERTICAL)
+        self.HomeworkGrid = wx.GridBagSizer(5, 5)
+        self.counter = 0
+
+        self.add_field_parent('Build String', 'self.HomeworkGrid')
+        self.add_field_parent('Exe Filename', 'self.HomeworkGrid')
+        self.add_field_parent('Homework', 'self.HomeworkGrid')
+        self.add_field_parent('Absolute Path', 'self.HomeworkGrid')
+
+        self.button_checker_path = wx.Button(self, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnCheckerPathBrowse, self.button_checker_path)
+        self.HomeworkGrid.Add(self.button_checker_path, pos=(self.counter, 4), span=(1, 1), flag=wx.RIGHT | wx.EXPAND,
+                              border=5)
+        self.counter = self.counter + 1
+
+        self.add_field_parent('Relative Download Path', 'self.HomeworkGrid')
+        self.add_field_parent('Relative Checker Path', 'self.HomeworkGrid')
+
+        self.HomeworkGrid.AddGrowableCol(1)
+        self.HomeworkOptionBoxSizer.Add(self.HomeworkGrid, flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.LEFT | wx.RIGHT)
+        self.sizer.Add(self.HomeworkOptionBoxSizer, pos=(3, 0), span=(1, 5),
+                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.BOTTOM, border=5)
+
+    def InitTest(self):
+        self.TestOptionBox = wx.StaticBox(self, label="Tests Options")
+        self.TestOptionBoxSizer = wx.StaticBoxSizer(self.TestOptionBox, wx.VERTICAL)
+        self.TestGrid = wx.GridBagSizer(5, 5)
+        self.counter = 0
+
+        self.add_field_parent('In Files', 'self.TestGrid')
+        self.button_in_files = wx.Button(self, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnInFilesBrowser, self.button_in_files)
+        self.TestGrid.Add(self.button_in_files, pos=(self.counter, 4), span=(1, 1), flag=wx.EXPAND | wx.RIGHT, border=5)
+        self.counter = self.counter + 1
+
+        self.add_field_parent('Out Files', 'self.TestGrid')
+        self.button_out_files = wx.Button(self, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnOutFilesBrowser, self.button_out_files)
+        self.TestGrid.Add(self.button_out_files, pos=(self.counter, 4), span=(1, 1), flag=wx.EXPAND | wx.RIGHT,
+                          border=5)
+        self.counter = self.counter + 1
+
+        self.add_field_parent('Reference Files', 'self.TestGrid')
+        self.button_reference_files = wx.Button(self, label="Browse...", size=(70, 30))
+        self.Bind(wx.EVT_BUTTON, self.OnReferenceFilesBrowser, self.button_reference_files)
+        self.TestGrid.Add(self.button_reference_files, pos=(self.counter, 4), span=(1, 1), flag=wx.EXPAND | wx.RIGHT,
+                          border=5)
+        self.counter = self.counter + 1
+
+        self.TestGrid.AddGrowableCol(1)
+        self.TestOptionBoxSizer.Add(self.TestGrid, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM)
+        self.sizer.Add(self.TestOptionBoxSizer, pos=(4, 0), span=(1, 5),
+                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.BOTTOM, border=5)
+
     def __init__(self, parent):
         super(ConfigurationTab, self).__init__(parent, -1, style=wx.TAB_TRAVERSAL, name='Panel')
 
@@ -426,98 +548,11 @@ class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
         self.SetupScrolling()
         self.sizer = wx.GridBagSizer(5, 5)
 
-        self.counter = 0
-
-        self.StarterOptionBox = wx.StaticBox(self, label="Starter Options")
-        self.StarterOptionBoxSizer = wx.StaticBoxSizer(self.StarterOptionBox, wx.VERTICAL)
-
-        self.add_field_parent('Timeout', 'self.StarterOptionBoxSizer')
-
-        self.sizer.Add(self.StarterOptionBoxSizer, pos=(0, 0), span=(1, 6),
-                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.RIGHT | wx.BOTTOM, border=5)
-
-        self.EmailOptionBox = wx.StaticBox(self, label="Email Options")
-        self.EmailOptionBoxSizer = wx.StaticBoxSizer(self.EmailOptionBox, wx.VERTICAL)
-
-        self.add_field_parent('Homework', 'self.EmailOptionBoxSizer')
-        self.add_field_parent('Email Address', 'self.EmailOptionBoxSizer')
-
-        self.sizer_password = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_password = wx.StaticText(self, label="Password")
-        self.sizer_password.Add(self.label_password, flag=wx.LEFT | wx.TOP | wx.RIGHT, border=5)
-        self.text_password = wx.TextCtrl(self, style=wx.TE_PASSWORD)
-        self.sizer_password.Add(self.text_password, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.TOP | wx.RIGHT,
-                                border=5)
-        self.EmailOptionBoxSizer.Add(self.sizer_password, flag=wx.EXPAND | wx.LEFT | wx.TOP | wx.RIGHT, border=5)
-        self.ConfigurationDictionary.update({'Password': ''})
-
-        self.add_field_parent('Email Server Address', 'self.EmailOptionBoxSizer')
-        self.add_field_parent('Email Server Port', 'self.EmailOptionBoxSizer')
-        self.add_field_parent('Imap Server Address', 'self.EmailOptionBoxSizer')
-        self.add_field_parent('Zip Format', 'self.EmailOptionBoxSizer')
-        self.add_field_parent('Grade Email Subject', 'self.EmailOptionBoxSizer')
-        self.add_field_parent('Grade Email Body', 'self.EmailOptionBoxSizer')
-
-        self.sizer.Add(self.EmailOptionBoxSizer, pos=(1, 0), span=(1, 5),
-                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.BOTTOM, border=5)
-
-        self.SheetsOptionBox = wx.StaticBox(self, label="Sheets Options")
-        self.SheetsOptionBoxSizer = wx.StaticBoxSizer(self.SheetsOptionBox, wx.VERTICAL)
-
-        self.add_field_parent('Sheets Secret File', 'self.SheetsOptionBoxSizer')
-        self.button_secret_file = wx.Button(self, label="Browse...", size=(70, 30))
-        self.Bind(wx.EVT_BUTTON, self.OnSecretFileBrowser, self.button_secret_file)
-        self.SheetsOptionBoxSizer.Add(self.button_secret_file, flag=wx.EXPAND | wx.RIGHT,
-                                      border=5)
-
-        self.add_field_parent('Sheets Scopes', 'self.SheetsOptionBoxSizer')
-        self.add_field_parent('Sheets Application Name', 'self.SheetsOptionBoxSizer')
-        self.add_field_parent('Sheets Key', 'self.SheetsOptionBoxSizer')
-        self.add_field_parent('Sheets Id', 'self.SheetsOptionBoxSizer')
-
-        self.sizer.Add(self.SheetsOptionBoxSizer, pos=(2, 0), span=(1, 5),
-                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.BOTTOM, border=5)
-
-        self.HomeworkOptionBox = wx.StaticBox(self, label="Homework Options")
-        self.HomeworkOptionBoxSizer = wx.StaticBoxSizer(self.HomeworkOptionBox, wx.VERTICAL)
-
-        self.add_field_parent('Build String', 'self.HomeworkOptionBoxSizer')
-        self.add_field_parent('Exe Filename', 'self.HomeworkOptionBoxSizer')
-        self.add_field_parent('Subject', 'self.HomeworkOptionBoxSizer')
-        self.add_field_parent('Absolute Path', 'self.HomeworkOptionBoxSizer')
-
-        self.button_checker_path = wx.Button(self, label="Browse...", size=(70, 30))
-        self.Bind(wx.EVT_BUTTON, self.OnCheckerPathBrowse, self.button_checker_path)
-        self.HomeworkOptionBoxSizer.Add(self.button_checker_path, flag=wx.RIGHT | wx.EXPAND,
-                                        border=5)
-        self.counter = self.counter + 1
-
-        self.add_field_parent('Relative Download Path', 'self.HomeworkOptionBoxSizer')
-        self.add_field_parent('Relative Checker Path', 'self.HomeworkOptionBoxSizer')
-
-        self.sizer.Add(self.HomeworkOptionBoxSizer, pos=(3, 0), span=(1, 5),
-                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.BOTTOM, border=5)
-
-        self.TestOptionBox = wx.StaticBox(self, label="Tests Options")
-        self.TestOptionBoxSizer = wx.StaticBoxSizer(self.TestOptionBox, wx.VERTICAL)
-
-        self.add_field_parent('In Files', 'self.TestOptionBoxSizer')
-        self.button_in_files = wx.Button(self, label="Browse...", size=(70, 30))
-        self.Bind(wx.EVT_BUTTON, self.OnInFilesBrowser, self.button_in_files)
-        self.TestOptionBoxSizer.Add(self.button_in_files, flag=wx.EXPAND | wx.RIGHT, border=5)
-
-        self.add_field_parent('Out Files', 'self.TestOptionBoxSizer')
-        self.button_out_files = wx.Button(self, label="Browse...", size=(70, 30))
-        self.Bind(wx.EVT_BUTTON, self.OnOutFilesBrowser, self.button_out_files)
-        self.TestOptionBoxSizer.Add(self.button_out_files, flag=wx.EXPAND | wx.RIGHT, border=5)
-
-        self.add_field_parent('Reference Files', 'self.TestOptionBoxSizer')
-        self.button_reference_files = wx.Button(self, label="Browse...", size=(70, 30))
-        self.Bind(wx.EVT_BUTTON, self.OnReferenceFilesBrowser, self.button_reference_files)
-        self.TestOptionBoxSizer.Add(self.button_reference_files, flag=wx.EXPAND | wx.RIGHT, border=5)
-
-        self.sizer.Add(self.TestOptionBoxSizer, pos=(4, 0), span=(1, 5),
-                       flag=wx.TOP | wx.LEFT | wx.EXPAND | wx.BOTTOM, border=5)
+        self.InitStarter()
+        self.InitEmail()
+        self.InitSheets()
+        self.InitHomework()
+        self.InitTest()
 
         self.sizer.AddGrowableCol(1)
         self.SetSizerAndFit(self.sizer)
