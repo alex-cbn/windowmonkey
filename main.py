@@ -390,8 +390,10 @@ class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
         return result
 
     def add_field_parent(self, name, parent):  # syntactic sugar here
+        name_with_spaces = name
+        name = name.strip()
         name = name.replace(' ', '_')
-        setattr(self, 'label_' + name.lower(), wx.StaticText(self, label=name.replace('_', ' ')))
+        setattr(self, 'label_' + name.lower(), wx.StaticText(self, label=name_with_spaces))
         setattr(self, 'text_' + name.lower(), wx.TextCtrl(self))
         cmd = parent + ".Add(self.label_" + name.lower() + ", pos=(" + \
               str(self.counter) + ", 0), span=(1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)"
@@ -421,7 +423,7 @@ class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
         self.StarterGrid = wx.GridBagSizer(5, 5)
         self.counter = 0
 
-        self.add_field_parent('Timeout', 'self.StarterGrid')
+        self.add_field_parent('Timeout                              ', 'self.StarterGrid')
 
         self.StarterGrid.AddGrowableCol(1)
         self.StarterOptionBoxSizer.Add(self.StarterGrid, flag=wx.EXPAND | wx.LEFT | wx.TOP | wx.RIGHT | wx.BOTTOM)
@@ -452,7 +454,7 @@ class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
         self.add_field_parent('Subject', 'self.EmailGrid')
         self.add_field_parent('Zip Format', 'self.EmailGrid')
         self.add_field_parent('Grade Email Subject', 'self.EmailGrid')
-        self.add_field_parent('Grade Email Body', 'self.EmailGrid')
+        self.add_field_parent('Grade Email Body              ', 'self.EmailGrid')
 
         self.EmailGrid.AddGrowableCol(1)
         self.EmailOptionBoxSizer.Add(self.EmailGrid, flag=wx.EXPAND | wx.LEFT | wx.TOP | wx.RIGHT | wx.BOTTOM)
@@ -473,7 +475,7 @@ class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
         self.counter = self.counter + 1
 
         self.add_field_parent('Sheets Scopes', 'self.SheetsGrid')
-        self.add_field_parent('Sheets Application Name', 'self.SheetsGrid')
+        self.add_field_parent('Sheets Application Name ', 'self.SheetsGrid')
         self.add_field_parent('Sheets Key', 'self.SheetsGrid')
         self.add_field_parent('Sheets Id', 'self.SheetsGrid')
 
@@ -499,7 +501,7 @@ class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
                               border=5)
         self.counter = self.counter + 1
 
-        self.add_field_parent('Relative Download Path', 'self.HomeworkGrid')
+        self.add_field_parent('Relative Download Path   ', 'self.HomeworkGrid')
         self.add_field_parent('Relative Checker Path', 'self.HomeworkGrid')
 
         self.HomeworkGrid.AddGrowableCol(1)
@@ -513,7 +515,7 @@ class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
         self.TestGrid = wx.GridBagSizer(5, 5)
         self.counter = 0
 
-        self.add_field_parent('In Files', 'self.TestGrid')
+        self.add_field_parent('In Files                                ', 'self.TestGrid')
         self.button_in_files = wx.Button(self, label="Browse...", size=(70, 30))
         self.Bind(wx.EVT_BUTTON, self.OnInFilesBrowser, self.button_in_files)
         self.TestGrid.Add(self.button_in_files, pos=(self.counter, 4), span=(1, 1), flag=wx.EXPAND | wx.RIGHT, border=5)
