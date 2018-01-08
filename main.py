@@ -702,19 +702,23 @@ class MainWindowTabbed(wx.Frame):
 
         self.main_panel = wx.Panel(self)
         self.notebook = wx.Notebook(self.main_panel)
+
         self.tab_1 = StarterTab(self.notebook)
         self.tab_2 = EmailTab(self.notebook)
         self.tab_3 = SheetsTab(self.notebook)
         self.tab_4 = HomeworkTab(self.notebook)
         self.tab_5 = TestsTab(self.notebook)
+
         self.notebook.AddPage(self.tab_1, "Starter")
         self.notebook.AddPage(self.tab_2, "Email")
         self.notebook.AddPage(self.tab_3, "Sheets")
         self.notebook.AddPage(self.tab_4, "Homework")
         self.notebook.AddPage(self.tab_5, "Tests")
 
-        sizer = wx.BoxSizer()
-        sizer.Add(self.notebook, 1, wx.EXPAND)
+        sizer = wx.GridBagSizer(1, 1)
+        sizer.Add(self.notebook, pos=(0, 0), span=(1, 1), flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.LEFT | wx.RIGHT)
+        sizer.AddGrowableCol(0)
+        sizer.AddGrowableRow(0)
         self.main_panel.SetSizer(sizer)
 
         self.icon = wx.Icon()
@@ -723,6 +727,9 @@ class MainWindowTabbed(wx.Frame):
 
         self.Center()
         self.Show()
+
+        self.notebook.ChangeSelection(1)  # fixes a black square bug that appeared
+        self.notebook.ChangeSelection(0)  # fix the symptoms not the cause
 
     def OnQuit(self, e):
         self.Close()
