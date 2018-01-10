@@ -455,6 +455,14 @@ class EmailTab(wx.lib.scrolledpanel.ScrolledPanel):
 
         self.sizer.AddGrowableCol(1)
         self.SetSizerAndFit(self.sizer)
+        # StaticConfiguration.text_email_address.Bind(wx.EVT_KILL_FOCUS, self.AutoFillEmail)
+        #
+        #
+        # def AutoFillEmail(self, e):
+        #     if 'gmail' in StaticConfiguration.text_email_address.GetValue():
+        #         StaticConfiguration.text_email_server_address.SetValue('smtp.google.com')
+        #         StaticConfiguration.text_imap_server_address.SetValue('imap.google.com')
+        #         StaticConfiguration.text_email_server_port.SetValue('587')
 
 
 class SheetsTab(wx.lib.scrolledpanel.ScrolledPanel):
@@ -715,11 +723,15 @@ class MainWindowTabbed(wx.Frame):
         self.notebook.AddPage(self.tab_4, "Homework")
         self.notebook.AddPage(self.tab_5, "Tests")
 
-        sizer = wx.GridBagSizer(1, 1)
-        sizer.Add(self.notebook, pos=(0, 0), span=(1, 1), flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.LEFT | wx.RIGHT)
-        sizer.AddGrowableCol(0)
-        sizer.AddGrowableRow(0)
-        self.main_panel.SetSizer(sizer)
+        # sizer = wx.GridBagSizer(1, 1)
+        # sizer.Add(self.notebook, pos=(0, 0), span=(1, 1), flag=wx.EXPAND | wx.TOP | wx.BOTTOM | wx.LEFT | wx.RIGHT)
+        # sizer.AddGrowableCol(0)
+        # sizer.AddGrowableRow(0)
+
+        self.sizer = wx.BoxSizer()
+        self.sizer.Add(self.notebook, wx.EXPAND)
+
+        self.main_panel.SetSizer(self.sizer)
 
         self.icon = wx.Icon()
         self.icon.CopyFromBitmap(wx.Bitmap('icon.ico', wx.BITMAP_TYPE_ANY))
