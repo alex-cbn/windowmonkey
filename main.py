@@ -1,5 +1,14 @@
 import re
+import smtplib
 
+import httplib2
+from apiclient import discovery
+from oauth2client import client
+from oauth2client import tools
+from oauth2client.file import Storage
+from argparse import Namespace
+
+import os
 import wx
 import wx.lib.scrolledpanel as LibScrolledPanel
 
@@ -12,6 +21,18 @@ def list_to_string(list):
     result = '[' + result + ']'
     result = result.replace('\\', "\\\\")
     return result
+
+
+def InfoBox(parent, message, caption='Insert program title'):
+    dlg = wx.MessageDialog(parent, message, caption, wx.OK | wx.ICON_INFORMATION)
+    dlg.ShowModal()
+    dlg.Destroy()
+
+
+def WarnBox(parent, message, caption='Warning!'):
+    dlg = wx.MessageDialog(parent, message, caption, wx.OK | wx.ICON_WARNING)
+    dlg.ShowModal()
+    dlg.Destroy()
 
 
 class StaticConfiguration:
@@ -78,6 +99,80 @@ class StaticConfiguration:
                     line = file.readline()
         except IOError:
             wx.LogError('Fak')
+
+
+class SheetsTest:
+    def get_credentials(self):
+        home_dir = os.path.expanduser('~')
+        credential_dir = os.path.join(home_dir, '.credentials')
+        if not os.path.exists(credential_dir):
+            os.makedirs(credential_dir)
+        file_name = self.SheetsApplicationName + '.json'
+        credential_path = os.path.join(credential_dir, file_name)
+
+        store = Storage(credential_path)
+        credentials = store.get()
+        if not credentials or credentials.invalid:
+            flow = client.flow_from_clientsecrets(self.SheetsSecretFile, self.SheetsScopes)
+            flow.user_agent = self.SheetsApplicationName
+            if self.flags:
+                credentials = tools.run_flow(flow, store, self.flags)
+            print('Storing credentials to ' + credential_path)
+        return credentials
+
+    def __init__(self, Secret, Id, Scopes, Key, ApplicationName):
+        self.flags = Namespace(auth_host_name='localhost',
+                               auth_host_port=[8080, 8090],
+                               logging_level='ERROR',
+                               noauth_local_webserver=False)
+        self.SheetsSecretFile = Secret
+        self.SheetsScopes = Scopes
+        self.SheetsKey = Key
+        self.Id = Id
+        self.SheetsApplicationName = ApplicationName
+        self.credentials = self.get_credentials()
+        http = self.credentials.authorize(httplib2.Http())
+        discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
+                        'version=v4')
+        self.service = discovery.build('sheets', 'v4', http=http,
+                                       discoveryServiceUrl=discoveryUrl)
+        result = self.service.spreadsheets().values().get(spreadsheetId=self.Id, range='A1',
+                                                          key=self.SheetsKey).execute()
+        values = result.get('values', [])
+        self.exa1 = values[0][0]
+        testword = 'Works'
+        append_values = [
+            [
+                testword
+            ]
+        ]
+        body = {
+            'values': append_values,
+            'majorDimension': 'ROWS'
+        }
+        result = self.service.spreadsheets().values().update(spreadsheetId=self.Id, range='A1',
+                                                             key=self.SheetsKey,
+                                                             body=body, valueInputOption="RAW").execute()
+        result = self.service.spreadsheets().values().get(spreadsheetId=self.Id, range='A1',
+                                                          key=self.SheetsKey).execute()
+        self.Success = False
+        values = result.get('values', [])
+        if values[0][0] == testword:
+            self.Success = True
+
+    def Restore(self):
+        append_values = [
+            [
+                self.exa1
+            ]
+        ]
+        body = {
+            'values': append_values,
+            'majorDimension': 'ROWS'
+        }
+        result = self.service.spreadsheets().values().update(spreadsheetId=self.Id, range='A1',
+                                                             key=self.SheetsKey,
+                                                             body=body, valueInputOption="RAW").execute()
 
 
 class ConfigurationTab(wx.lib.scrolledpanel.ScrolledPanel):
@@ -665,24 +760,39 @@ class MainWindowTabbed(wx.Frame):
     def __init__(self, parent, title):
         super(MainWindowTabbed, self).__init__(parent, title=title, size=(550, 400))
 
+        # Create MenuBar
         menu_bar = wx.MenuBar()
+
+        # Create File Menu Entry in MenuBar
         file_menu = wx.Menu()
 
+        # Creating File Menu Entries
         file_menu_new = wx.MenuItem(file_menu, wx.ID_NEW, '&New')
         file_menu_open = wx.MenuItem(file_menu, wx.ID_OPEN, '&Open')
         file_menu_save = wx.MenuItem(file_menu, wx.ID_SAVE, '&Save')
         file_menu_save_as = wx.MenuItem(file_menu, wx.ID_SAVEAS, 'Save &As')
 
+        # Adding File Menu Entries that we just created
         file_menu.Append(file_menu_new)
         file_menu.Append(file_menu_open)
         file_menu.Append(file_menu_save)
         file_menu.Append(file_menu_save_as)
 
+        # Adding a Separator in File Menu
         file_menu.AppendSeparator()
 
+        # Adding exit entry
         file_menu_exit = wx.MenuItem(file_menu, wx.ID_EXIT, 'E&xit\tCtrl+X')
-
+        # Appending exit entry
         file_menu.Append(file_menu_exit)
+
+        test_menu = wx.Menu()
+
+        test_menu_sheets = wx.MenuItem(test_menu, wx.ID_ANY, '&Sheets')
+        test_menu_email = wx.MenuItem(test_menu, wx.ID_ANY, '&Email')
+
+        test_menu.Append(test_menu_sheets)
+        test_menu.Append(test_menu_email)
 
         help_menu = wx.Menu()
 
@@ -702,8 +812,11 @@ class MainWindowTabbed(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnSaveAs, file_menu_save_as)
         self.Bind(wx.EVT_MENU, self.OnHelp, help_menu_help)
         self.Bind(wx.EVT_MENU, self.OnAbout, help_menu_about)
+        self.Bind(wx.EVT_MENU, self.OnTestEmail, test_menu_email)
+        self.Bind(wx.EVT_MENU, self.OnTestSheets, test_menu_sheets)
 
         menu_bar.Append(file_menu, '&File')
+        menu_bar.Append(test_menu, '&Test')
         menu_bar.Append(help_menu, 'Hel&p')
 
         self.SetMenuBar(menu_bar)
@@ -782,6 +895,36 @@ class MainWindowTabbed(wx.Frame):
 
     def OnAbout(self, e):
         about_window = AboutWindow(self)
+
+    def OnTestSheets(self, e):
+        SheetsSecretFile = Configuration.ConfigurationDictionary['Sheets Secret File']
+        SheetsScopes = Configuration.ConfigurationDictionary['Sheets Scopes']
+        SheetsApplicationName = Configuration.ConfigurationDictionary['Sheets Application Name']
+        SheetsKey = Configuration.ConfigurationDictionary['Sheets Key']
+        SheetsId = Configuration.ConfigurationDictionary['Sheets Id']
+        SheetsTester = SheetsTest(SheetsSecretFile, SheetsId, SheetsScopes, SheetsKey, SheetsApplicationName)
+        if SheetsTester.Success:
+            InfoBox(self,
+                    'Connection to the specified Spreadsheet was possible.\n The word \'Works\' has been written in A1',
+                    'Success')
+            SheetsTester.Restore()
+        else:
+            WarnBox(self, 'Connection to the specified Spreadsheet could not be established', 'Connection Failed')
+
+    def OnTestEmail(self, e):
+        EmailAddress = Configuration.ConfigurationDictionary['Email Address']
+        Password = Configuration.ConfigurationDictionary['Password']
+        EmailServerAddress = Configuration.ConfigurationDictionary['Email Server Address']
+        EmailServerPort = Configuration.ConfigurationDictionary['Email Server Port']
+        try:
+            server = smtplib.SMTP(EmailServerAddress, int(EmailServerPort))
+            server.starttls()
+            server.login(EmailAddress, Password)
+        except Exception:
+            WarnBox(self, 'Connection to the email server has failed', 'Connection Failed')
+            return
+        InfoBox(self, 'Connection to the email server was SUCCESSFUL', 'Success')
+        server.close()
 
 
 class MainWindow(wx.Frame):
