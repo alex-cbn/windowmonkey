@@ -139,7 +139,10 @@ class SheetsTest:
         result = self.service.spreadsheets().values().get(spreadsheetId=self.Id, range='A1',
                                                           key=self.SheetsKey).execute()
         values = result.get('values', [])
-        self.exa1 = values[0][0]
+        if len(values) == 0:
+            self.exa1 = ""
+        else:
+            self.exa1 = values[0][0]
         testword = 'Works'
         append_values = [
             [
